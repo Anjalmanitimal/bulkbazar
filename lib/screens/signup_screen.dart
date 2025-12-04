@@ -30,13 +30,10 @@ class SignupScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
               const CustomTextField(hint: "Name"),
-
               const SizedBox(height: 15),
               const CustomTextField(hint: "Email"),
-
               const SizedBox(height: 15),
               const CustomTextField(hint: "Password", obscure: true),
-
               const SizedBox(height: 15),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

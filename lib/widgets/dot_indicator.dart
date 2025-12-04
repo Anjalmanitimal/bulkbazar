@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class DotIndicator extends StatelessWidget {
   final bool isActive;
-
   const DotIndicator({super.key, required this.isActive});
 
   @override

@@ -16,33 +16,18 @@ class LoginScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-
-              // Title
               const Text(
-                "Welcome Back!",
+                "LOGIN",
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 8),
-
-              const Text(
-                "Login to continue using BulkBazar.",
-                style: TextStyle(fontSize: 15, color: Colors.black54),
-              ),
-
               const SizedBox(height: 40),
-
-              // Email Field
               const CustomTextField(hint: "Email"),
-
               const SizedBox(height: 20),
-
-              // Password Field
               const CustomTextField(hint: "Password", obscure: true),
-
               const SizedBox(height: 10),
 
-              // Forgot Password
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -59,11 +44,17 @@ class LoginScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // LOGIN BUTTON
               BlueButton(
-                text: "Login",
+                text: "LOGIN AS SELLER",
                 onPressed: () {
-                  //TODO: Dashboard navigation later
+                  /* TODO seller login */
+                },
+              ),
+              const SizedBox(height: 12),
+              BlueButton(
+                text: "LOGIN AS CUSTOMER",
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, '/dashboard');
                 },
               ),
 
