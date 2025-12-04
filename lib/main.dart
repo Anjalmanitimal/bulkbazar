@@ -1,3 +1,4 @@
+import 'package:bulkbazar/screens/login_screen.dart';
 import 'package:bulkbazar/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
 
       routes: {
         '/signup': (context) => const SignupScreen(),
-        // '/login': (context) => const LoginScreen(),
+        '/login': (context) => const LoginScreen(),
       },
     );
   }
