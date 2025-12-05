@@ -21,7 +21,6 @@ class SignupScreen extends StatelessWidget {
                 },
                 icon: const Icon(Icons.arrow_back, size: 26),
               ),
-
               const SizedBox(height: 10),
               const Text(
                 "Sign up",

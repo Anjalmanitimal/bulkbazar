@@ -8,13 +8,19 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 244, 240, 240),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.arrow_back, size: 26),
+              ),
               const SizedBox(height: 40),
               const Text(
                 "LOGIN",
@@ -59,8 +65,6 @@ class LoginScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 30),
-
-              // Sign Up Redirect
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
