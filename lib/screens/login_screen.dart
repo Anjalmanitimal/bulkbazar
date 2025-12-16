@@ -50,12 +50,7 @@ class LoginScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              BlueButton(
-                text: "LOGIN AS SELLER",
-                onPressed: () {
-                  /* TODO seller login */
-                },
-              ),
+              BlueButton(text: "LOGIN AS SELLER", onPressed: () {}),
               const SizedBox(height: 12),
               BlueButton(
                 text: "LOGIN AS CUSTOMER",
