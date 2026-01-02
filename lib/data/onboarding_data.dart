@@ -1,4 +1,4 @@
-import '../models/onboarding_model.dart';
+import '../features/onboarding/domain/models/onboarding_model.dart';
 
 final onboardingItems = [
   OnboardingModel(
