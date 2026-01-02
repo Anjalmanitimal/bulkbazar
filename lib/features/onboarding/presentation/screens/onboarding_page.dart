@@ -1,7 +1,7 @@
-import 'package:bulkbazar/screens/signup_screen.dart';
+import 'package:bulkbazar/features/auth/presentation/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
-import '../data/onboarding_data.dart';
-import '../widgets/dot_indicator.dart';
+import '../../../../data/onboarding_data.dart';
+import '../../../auth/presentation/widgets/dot_indicator.dart';
 // import 'signup_screen.dart';
 
 class OnboardingPage extends StatefulWidget {

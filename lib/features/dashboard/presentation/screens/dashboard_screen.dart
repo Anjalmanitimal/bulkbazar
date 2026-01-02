@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'bottom_navigation_screens/home_screen.dart';
-import 'bottom_navigation_screens/shop_screen.dart';
-import 'bottom_navigation_screens/bag_screen.dart';
-import 'bottom_navigation_screens/profile_screen.dart';
+import '../../../home/presentation/screens/home_screen.dart';
+import '../../../shop/presentation/screens/shop_screen.dart';
+import '../../../bag/presentation/screens/bag_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

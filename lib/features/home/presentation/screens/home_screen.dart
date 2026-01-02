@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../widgets/hero_banner.dart';
-import '../../widgets/section_header.dart';
-import '../../widgets/horizontal_product_list.dart';
+import '../widgets/hero_banner.dart';
+import '../../../../core/widgets/section_header.dart';
+import '../widgets/horizontal_product_list.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
