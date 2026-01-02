@@ -9,15 +9,12 @@ import 'core/constants/hive_table_constants.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Initialize Hive
   await Hive.initFlutter();
 
-  // ✅ Register adapter
   if (!Hive.isAdapterRegistered(UserHiveModelAdapter().typeId)) {
     Hive.registerAdapter(UserHiveModelAdapter());
   }
 
-  // ✅ Open users box
   await Hive.openBox<UserHiveModel>(HiveTableConstants.usersBox);
 
   runApp(const MyApp());
