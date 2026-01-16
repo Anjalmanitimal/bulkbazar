@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
-import 'features/auth/data/models/user_hive_model.dart';
+import 'features/auth/data/models/auth_hive_model.dart';
 import 'core/constants/hive_table_constants.dart';
 
 void main() async {
@@ -11,11 +11,10 @@ void main() async {
 
   await Hive.initFlutter();
 
-  if (!Hive.isAdapterRegistered(UserHiveModelAdapter().typeId)) {
-    Hive.registerAdapter(UserHiveModelAdapter());
-  }
+  Hive.registerAdapter(AuthHiveModelAdapter());
 
-  await Hive.openBox<UserHiveModel>(HiveTableConstants.usersBox);
+  await Hive.openBox<AuthHiveModel>(HiveTableConstants.usersBox);
+  await Hive.openBox(HiveTableConstants.sessionBox);
 
   runApp(const MyApp());
 }

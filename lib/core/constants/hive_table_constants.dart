@@ -1,3 +1,6 @@
 class HiveTableConstants {
-  static const String usersBox = 'users_box';
+  HiveTableConstants._();
+
+  static const String usersBox = 'usersBox';
+  static const String sessionBox = 'sessionBox';
 }
