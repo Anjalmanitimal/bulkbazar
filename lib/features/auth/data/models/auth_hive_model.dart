@@ -1,9 +1,9 @@
 import 'package:hive/hive.dart';
 
-part 'user_hive_model.g.dart';
+part 'auth_hive_model.g.dart';
 
 @HiveType(typeId: 0)
-class UserHiveModel extends HiveObject {
+class AuthHiveModel extends HiveObject {
   @HiveField(0)
   final String name;
 
@@ -16,7 +16,7 @@ class UserHiveModel extends HiveObject {
   @HiveField(3)
   final String role;
 
-  UserHiveModel({
+  AuthHiveModel({
     required this.name,
     required this.email,
     required this.password,
