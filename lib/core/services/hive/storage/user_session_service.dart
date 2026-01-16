@@ -3,41 +3,26 @@ import 'package:hive/hive.dart';
 
 import '../../../constants/hive_table_constants.dart';
 
-/// Provider
 final userSessionServiceProvider = Provider<UserSessionService>((ref) {
   return UserSessionService();
 });
 
 class UserSessionService {
-  /// Save logged-in user session
+  Box get _box => Hive.box(HiveTableConstants.sessionBox);
+
   Future<void> saveUserSession({
     required String userId,
     required String email,
+    required String fullName,
     required String role,
   }) async {
-    final box = Hive.box(HiveTableConstants.sessionBox);
-
-    await box.put('userId', userId);
-    await box.put('email', email);
-    await box.put('role', role);
-    await box.put('isLoggedIn', true);
+    await _box.put('userId', userId);
+    await _box.put('email', email);
+    await _box.put('fullName', fullName);
+    await _box.put('role', role);
   }
 
-  /// Check login status
-  bool isLoggedIn() {
-    final box = Hive.box(HiveTableConstants.sessionBox);
-    return box.get('isLoggedIn', defaultValue: false);
-  }
-
-  /// Get role (seller / customer)
-  String? getUserRole() {
-    final box = Hive.box(HiveTableConstants.sessionBox);
-    return box.get('role');
-  }
-
-  /// Clear session on logout
   Future<void> clearUserSession() async {
-    final box = Hive.box(HiveTableConstants.sessionBox);
-    await box.clear();
+    await _box.clear();
   }
 }

@@ -1,22 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/datasources/remote/auth_remote_datasource.dart';
+import '../../data/repositories/auth_repository.dart';
 import '../../data/models/auth_api_model.dart';
-import '../../data/datasources/auth_datasource.dart';
+import '../repositories/auth_repository.dart';
 
-final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
-  return RegisterUseCase(
-    authRemoteDatasource: ref.read(authRemoteDatasourceProvider),
-  );
+final registerUsecaseProvider = Provider<RegisterUsecase>((ref) {
+  final repository = ref.read(authRepositoryProvider);
+  return RegisterUsecase(repository);
 });
 
-class RegisterUseCase {
-  final IAuthRemoteDatasource _authRemoteDatasource;
+class RegisterUsecase {
+  final IAuthRepository _repository;
 
-  RegisterUseCase({required IAuthRemoteDatasource authRemoteDatasource})
-    : _authRemoteDatasource = authRemoteDatasource;
+  RegisterUsecase(this._repository);
 
-  Future<AuthApiModel> execute(AuthApiModel user) {
-    return _authRemoteDatasource.registerUser(user);
+  Future<bool> call(AuthApiModel model) async {
+    final entity = model.toEntity();
+
+    final result = await _repository.registerUser(entity);
+
+    return result.fold((failure) => false, (success) => success);
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bulkbazar/core/api/api_client.dart';
 import 'package:bulkbazar/core/api/api_endpoints.dart';
 import 'package:bulkbazar/core/services/hive/storage/user_session_service.dart';
+
 import '../auth_datasource.dart';
 import '../../models/auth_api_model.dart';
 
@@ -30,8 +31,7 @@ class AuthRemoteDatasource implements IAuthRemoteDatasource {
       data: user.toJson(),
     );
 
-    final data = response.data['data'];
-    return AuthApiModel.fromJson(data);
+    return AuthApiModel.fromJson(response.data['data']);
   }
 
   @override
@@ -47,6 +47,7 @@ class AuthRemoteDatasource implements IAuthRemoteDatasource {
       await _userSessionService.saveUserSession(
         userId: user.id!,
         email: user.email,
+        fullName: user.fullName,
         role: user.role,
       );
 
