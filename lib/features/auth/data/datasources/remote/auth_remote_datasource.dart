@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bulkbazar/core/api/api_client.dart';
 import 'package:bulkbazar/core/api/api_endpoints.dart';
 import 'package:bulkbazar/core/services/hive/storage/user_session_service.dart';
-
 import '../auth_datasource.dart';
 import '../../models/auth_api_model.dart';
+import '../../models/register_api_model.dart';
+import '../../../domain/entities/auth_entity.dart';
 
 final authRemoteDatasourceProvider = Provider<IAuthRemoteDatasource>((ref) {
   return AuthRemoteDatasource(
@@ -25,13 +26,18 @@ class AuthRemoteDatasource implements IAuthRemoteDatasource {
        _userSessionService = userSessionService;
 
   @override
-  Future<AuthApiModel> registerUser(AuthApiModel user) async {
+  Future<AuthApiModel> registerUser(AuthEntity entity) async {
     final response = await _apiClient.post(
       ApiEndpoints.register,
-      data: user.toJson(),
+      data: {
+        "email": entity.email,
+        "password": entity.password, // REQUIRED
+        "fullName": entity.fullName,
+        "role": entity.role,
+      },
     );
 
-    return AuthApiModel.fromJson(response.data['data']);
+    return AuthApiModel.fromJson(response.data['user']);
   }
 
   @override
