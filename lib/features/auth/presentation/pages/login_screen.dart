@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 
+import '../../../../core/api/api_client.dart';
+import '../../../../core/api/api_endpoints.dart';
+import '../../../../core/constants/hive_table_constants.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/blue_botton.dart';
-import '../../../../core/constants/hive_table_constants.dart';
-import '../../data/models/user_hive_model.dart';
+import '../../data/models/auth_hive_model.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+
+  bool _loading = false;
 
   @override
   void dispose() {
@@ -35,30 +42,50 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final box = Hive.box<UserHiveModel>(HiveTableConstants.usersBox);
+    setState(() => _loading = true);
 
     try {
-      final user = box.values.firstWhere(
-        (u) => u.email == email && u.password == password,
+      final apiClient = ref.read(apiClientProvider);
+
+      final response = await apiClient.post(
+        ApiEndpoints.login,
+        data: {"email": email, "password": password},
+      );
+
+      final token = response.data['token'];
+      final user = response.data['data'];
+
+      // ✅ Save JWT securely
+      await _secureStorage.write(key: 'auth_token', value: token);
+
+      // ✅ Cache user profile (NO PASSWORD)
+      final box = Hive.box<AuthHiveModel>(HiveTableConstants.usersBox);
+      await box.put(
+        'currentUser',
+        AuthHiveModel(
+          name: user['fullName'],
+          email: user['email'],
+          role: user['role'],
+          password: '',
+        ),
       );
 
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Login successful")));
 
-      // Role-based navigation
-      if (user.role == "customer") {
+      // ✅ Role-based navigation
+      if (user['role'] == "customer") {
         Navigator.pushReplacementNamed(context, '/dashboard');
-      } else if (user.role == "seller") {
-        // Seller dashboard not implemented yet
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Seller dashboard coming soon")),
-        );
+      } else if (user['role'] == "seller") {
+        Navigator.pushReplacementNamed(context, '/seller-dashboard');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Invalid email or password")),
       );
+    } finally {
+      setState(() => _loading = false);
     }
   }
 
@@ -97,7 +124,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 30),
 
-              BlueButton(text: "LOGIN", onPressed: _login),
+              _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : BlueButton(text: "LOGIN", onPressed: _login),
 
               const SizedBox(height: 20),
 

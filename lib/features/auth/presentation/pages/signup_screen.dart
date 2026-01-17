@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
+import '../../../../core/api/api_client.dart';
+import '../../../../core/api/api_endpoints.dart';
+import '../../../../core/constants/hive_table_constants.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/blue_botton.dart';
-import '../../../../core/constants/hive_table_constants.dart';
-import '../../data/models/user_hive_model.dart';
+import '../../data/models/auth_hive_model.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  bool _loading = false;
 
   @override
   void dispose() {
@@ -27,11 +32,10 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _signup(String role) async {
-    final String name = _nameController.text.trim();
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
-    // Validation
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -39,40 +43,46 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    final box = Hive.box<UserHiveModel>(HiveTableConstants.usersBox);
+    setState(() => _loading = true);
 
-    // Check if user already exists
-    final bool userExists = box.values.any((user) => user.email == email);
+    try {
+      final apiClient = ref.read(apiClientProvider);
 
-    if (userExists) {
+      final response = await apiClient.post(
+        ApiEndpoints.register,
+        data: {
+          "fullName": name,
+          "email": email,
+          "password": password,
+          "role": role,
+        },
+      );
+
+      final userData = response.data['data'];
+
+      // ✅ Save only NON-SENSITIVE data locally
+      final box = Hive.box<AuthHiveModel>(HiveTableConstants.usersBox);
+      await box.put(
+        'currentUser',
+        AuthHiveModel(
+          name: userData['fullName'],
+          email: userData['email'],
+          role: userData['role'],
+          password: '', // NEVER store password
+        ),
+      );
+
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("User already exists")));
-      return;
-    }
+      ).showSnackBar(const SnackBar(content: Text("Signup successful")));
 
-    // Create user
-    final user = UserHiveModel(
-      name: name,
-      email: email,
-      password: password,
-      role: role,
-    );
-
-    await box.add(user);
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Signup successful")));
-
-    // Role-based navigation
-    if (role == "customer") {
       Navigator.pushReplacementNamed(context, '/login');
-    } else {
-      // Seller dashboard not created yet
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Seller dashboard coming soon")),
-      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Signup failed: ${e.toString()}")));
+    } finally {
+      setState(() => _loading = false);
     }
   }
 
@@ -100,7 +110,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 30),
 
-              CustomTextField(hint: "Name", controller: _nameController),
+              CustomTextField(hint: "Full Name", controller: _nameController),
               const SizedBox(height: 15),
 
               CustomTextField(hint: "Email", controller: _emailController),
@@ -127,17 +137,21 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 30),
 
-              BlueButton(
-                text: "SIGN UP AS SELLER",
-                onPressed: () => _signup("seller"),
-              ),
-
-              const SizedBox(height: 15),
-
-              BlueButton(
-                text: "SIGN UP AS CUSTOMER",
-                onPressed: () => _signup("customer"),
-              ),
+              _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      children: [
+                        BlueButton(
+                          text: "SIGN UP AS SELLER",
+                          onPressed: () => _signup("seller"),
+                        ),
+                        const SizedBox(height: 15),
+                        BlueButton(
+                          text: "SIGN UP AS CUSTOMER",
+                          onPressed: () => _signup("customer"),
+                        ),
+                      ],
+                    ),
 
               const SizedBox(height: 20),
             ],

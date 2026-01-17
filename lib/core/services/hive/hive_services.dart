@@ -1,13 +1,13 @@
 import 'package:hive/hive.dart';
-import '../../../features/auth/data/models/user_hive_model.dart';
+import '../../../features/auth/data/models/auth_hive_model.dart';
 import '../../constants/hive_table_constants.dart';
 
 class HiveService {
-  static Box<UserHiveModel> get _userBox =>
-      Hive.box<UserHiveModel>(HiveTableConstants.usersBox);
+  static Box<AuthHiveModel> get _userBox =>
+      Hive.box<AuthHiveModel>(HiveTableConstants.usersBox);
 
   // Save user
-  static Future<void> addUser(UserHiveModel user) async {
+  static Future<void> addUser(AuthHiveModel user) async {
     await _userBox.add(user);
   }
 
