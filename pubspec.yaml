@@ -46,6 +46,7 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   equatable: ^2.0.5
   dartz: ^0.10.1
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:
