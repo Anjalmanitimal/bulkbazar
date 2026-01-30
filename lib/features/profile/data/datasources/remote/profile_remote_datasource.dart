@@ -34,10 +34,7 @@ class ProfileRemoteDataSource implements IProfileRemoteDataSource {
     final fileName = image.path.split('/').last;
 
     final formData = FormData.fromMap({
-      'profileImage': await MultipartFile.fromFile(
-        image.path,
-        filename: fileName,
-      ),
+      'image': await MultipartFile.fromFile(image.path, filename: fileName),
     });
 
     final token = await _tokenService.getToken();
