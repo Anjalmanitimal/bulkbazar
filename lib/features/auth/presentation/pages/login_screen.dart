@@ -31,14 +31,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
   Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
+    // Validation
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("All fields are required")));
+      _showSnackBar("All fields are required");
+      return;
+    }
+
+    if (!_isValidEmail(email)) {
+      _showSnackBar("Please enter a valid email address");
       return;
     }
 
@@ -70,9 +78,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       );
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Login successful")));
+      if (!mounted) return;
+
+      _showSnackBar("Login successful");
 
       // ✅ Role-based navigation
       if (user['role'] == "customer") {
@@ -80,13 +88,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       } else if (user['role'] == "seller") {
         Navigator.pushReplacementNamed(context, '/seller-dashboard');
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invalid email or password")),
-      );
+    } on Exception catch (e) {
+      if (!mounted) return;
+
+      // Better error handling - you can customize based on error types
+      final errorMessage = e.toString().contains('DioException')
+          ? "Network error. Please check your connection."
+          : "Invalid email or password";
+
+      _showSnackBar(errorMessage);
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -113,10 +134,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               const SizedBox(height: 30),
 
-              CustomTextField(hint: "Email", controller: _emailController),
+              CustomTextField(
+                key: const Key('login_email'),
+                hint: "Email",
+                controller: _emailController,
+              ),
               const SizedBox(height: 15),
 
               CustomTextField(
+                key: const Key('login_password'),
                 hint: "Password",
                 obscure: true,
                 controller: _passwordController,
@@ -124,9 +150,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               const SizedBox(height: 30),
 
-              _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : BlueButton(text: "LOGIN", onPressed: _login),
+              BlueButton(
+                key: const Key('login_button'),
+                text: _loading ? "LOADING..." : "LOGIN",
+                onPressed: _loading ? () {} : _login,
+              ),
+
+              if (_loading)
+                const Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
 
               const SizedBox(height: 20),
 
