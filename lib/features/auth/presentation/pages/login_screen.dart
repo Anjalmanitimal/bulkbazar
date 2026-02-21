@@ -1,3 +1,4 @@
+import 'package:bulkbazar/core/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -63,17 +64,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final token = response.data['token'];
       final user = response.data['data'];
 
-      // ✅ Save JWT securely
+      final String role = user['role']; // ✅ strongly typed
+
+      print("LOGIN ROLE: $role"); // ✅ debug check
+
+      // ✅ Save token securely
       await _secureStorage.write(key: 'auth_token', value: token);
 
-      // ✅ Cache user profile (NO PASSWORD)
+      // ✅ Save user locally in Hive
       final box = Hive.box<AuthHiveModel>(HiveTableConstants.usersBox);
+
       await box.put(
         'currentUser',
         AuthHiveModel(
           name: user['fullName'],
           email: user['email'],
-          role: user['role'],
+          role: role,
           password: '',
         ),
       );
@@ -82,21 +88,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       _showSnackBar("Login successful");
 
-      // ✅ Role-based navigation
-      if (user['role'] == "customer") {
-        Navigator.pushReplacementNamed(context, '/dashboard');
-      } else if (user['role'] == "seller") {
-        Navigator.pushReplacementNamed(context, '/seller-dashboard');
+      // ✅ ROLE BASED NAVIGATION (FINAL CLEAN WAY)
+      switch (role.toLowerCase()) {
+        case "seller":
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.sellerDashboard,
+            (route) => false,
+          );
+          break;
+
+        case "customer":
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.dashboard,
+            (route) => false,
+          );
+          break;
+
+        default:
+          _showSnackBar("Unknown role: $role");
       }
-    } on Exception catch (e) {
+    } catch (e) {
+      print("LOGIN ERROR: $e");
+
       if (!mounted) return;
 
-      // Better error handling - you can customize based on error types
-      final errorMessage = e.toString().contains('DioException')
-          ? "Network error. Please check your connection."
-          : "Invalid email or password";
-
-      _showSnackBar(errorMessage);
+      _showSnackBar("Login failed. Please try again.");
     } finally {
       if (mounted) {
         setState(() => _loading = false);

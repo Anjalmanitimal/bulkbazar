@@ -5,6 +5,7 @@ import '../../features/onboarding/presentation/screens/onboarding_page.dart';
 import '../../features/auth/presentation/pages/signup_screen.dart';
 import '../../features/auth/presentation/pages/login_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../../features/seller/presentation/screens/seller_dashboard_screen.dart';
 
 class AppRoutes {
   static const splash = '/splash';
@@ -12,6 +13,7 @@ class AppRoutes {
   static const signup = '/signup';
   static const login = '/login';
   static const dashboard = '/dashboard';
+  static const sellerDashboard = '/seller-dashboard'; // ✅ NEW
 
   static Map<String, WidgetBuilder> routes = {
     splash: (_) => const SplashScreen(),
@@ -19,5 +21,6 @@ class AppRoutes {
     signup: (_) => const SignupScreen(),
     login: (_) => const LoginScreen(),
     dashboard: (_) => const DashboardScreen(),
+    sellerDashboard: (_) => const SellerDashboardScreen(), // ✅ NEW
   };
 }
