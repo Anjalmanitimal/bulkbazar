@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bulkbazar/features/product/domain/usecases/add_product_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -50,22 +51,51 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   }
 
   Future<void> submit() async {
-    if (!_formKey.currentState!.validate() ||
-        selectedImage == null ||
-        pricingList.isEmpty) {
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    await ref
-        .read(addProductUsecaseProvider)
-        .call(
-          name: nameController.text,
-          description: descriptionController.text,
-          image: selectedImage!,
-          pricing: pricingList,
+    if (selectedImage == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please select an image")));
+      return;
+    }
+
+    if (pricingList.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please add MOQ pricing")));
+      return;
+    }
+
+    try {
+      print("Selected image path: ${selectedImage!.path}");
+      print("File exists: ${await selectedImage!.exists()}");
+
+      await ref
+          .read(addProductUsecaseProvider)
+          .call(
+            name: nameController.text,
+            description: descriptionController.text,
+            image: selectedImage!,
+            pricing: pricingList,
+          );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Product added successfully")),
         );
 
-    Navigator.pop(context);
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      print("UPLOAD ERROR: $e");
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
   }
 
   @override

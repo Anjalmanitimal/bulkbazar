@@ -1,22 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/datasources/product_remote_datasource.dart';
-import '../../data/repositories/product_repository_impl.dart';
-import '../../domain/usecases/add_product_usecase.dart';
+import '../../domain/entities/product_entity.dart';
 import '../../domain/usecases/get_product_usecase.dart';
 
-final productRepositoryProvider = Provider((ref) {
-  final datasource = ref.read(productRemoteDatasourceProvider);
-  return ProductRepositoryImpl(datasource);
-});
+final productProvider =
+    StateNotifierProvider<ProductNotifier, AsyncValue<List<ProductEntity>>>(
+      (ref) => ProductNotifier(ref.read(getProductsUsecaseProvider)),
+    );
 
-final addProductUsecaseProvider = Provider((ref) {
-  return AddProductUsecase(ref.read(productRepositoryProvider));
-});
+class ProductNotifier extends StateNotifier<AsyncValue<List<ProductEntity>>> {
+  final GetProductsUsecase getProductsUsecase;
 
-final getProductsUsecaseProvider = Provider((ref) {
-  return GetProductsUsecase(ref.read(productRepositoryProvider));
-});
+  ProductNotifier(this.getProductsUsecase) : super(const AsyncLoading()) {
+    fetchProducts();
+  }
 
-final productListProvider = FutureProvider((ref) {
-  return ref.read(getProductsUsecaseProvider).call();
-});
+  Future<void> fetchProducts() async {
+    try {
+      state = const AsyncLoading();
+
+      final products = await getProductsUsecase();
+
+      state = AsyncData(products);
+    } catch (e, stack) {
+      state = AsyncError(e, stack);
+    }
+  }
+}

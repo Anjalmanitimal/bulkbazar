@@ -1,6 +1,12 @@
-import 'dart:io';
-import '../entities/product_entity.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repositories/product_repository.dart';
+import '../../data/repositories/product_repository_impl.dart';
+import '../entities/product_entity.dart';
+
+final addProductUsecaseProvider = Provider<AddProductUsecase>((ref) {
+  final repository = ref.read(productRepositoryProvider);
+  return AddProductUsecase(repository);
+});
 
 class AddProductUsecase {
   final ProductRepository repository;
@@ -10,10 +16,10 @@ class AddProductUsecase {
   Future<void> call({
     required String name,
     required String description,
-    required File image,
+    required dynamic image,
     required List<PricingEntity> pricing,
-  }) {
-    return repository.addProduct(
+  }) async {
+    await repository.addProduct(
       name: name,
       description: description,
       image: image,
