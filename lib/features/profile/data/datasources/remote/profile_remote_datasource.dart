@@ -64,4 +64,9 @@ class ProfileRemoteDataSource implements IProfileRemoteDataSource {
 
     return ProfileApiModel.fromJson(response.data);
   }
+
+  // ✅ FIXED LOGOUT
+  Future<void> logout() async {
+    await _tokenService.deleteToken();
+  }
 }

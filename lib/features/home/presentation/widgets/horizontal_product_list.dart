@@ -46,7 +46,7 @@ class HorizontalProductList extends ConsumerWidget {
                         image: product.image != null
                             ? DecorationImage(
                                 image: NetworkImage(
-                                  "${ApiEndpoints.baseUrl}/${product.image}",
+                                  "${ApiEndpoints.imageBaseUrl}${product.image}",
                                 ),
                                 fit: BoxFit.cover,
                               )

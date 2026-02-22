@@ -101,6 +101,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 40),
+
+                // LOGOUT BUTTON
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.logout),
+                    label: const Text("Logout"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () async {
+                      await _logout();
+                    },
+                  ),
+                ),
 
                 const SizedBox(height: 24),
 
@@ -145,5 +163,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _logout() async {
+    try {
+      // clear token from storage
+      final remote = ref.read(profileRemoteDatasourceProvider);
+      await remote.logout();
+
+      if (!mounted) return;
+
+      // navigate to login and remove all routes
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Logout failed: $e")));
+    }
   }
 }

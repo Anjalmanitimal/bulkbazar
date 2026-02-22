@@ -1,5 +1,6 @@
 class ApiEndpoints {
   static const String baseUrl = 'http://10.0.2.2:4000/api';
+  static const String imageBaseUrl = 'http://10.0.2.2:4000';
 
   static const Duration connectionTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 15);
