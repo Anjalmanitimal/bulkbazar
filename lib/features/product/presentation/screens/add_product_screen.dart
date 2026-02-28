@@ -177,9 +177,24 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
               const SizedBox(height: 20),
 
-              ElevatedButton(
-                onPressed: submit,
-                child: const Text("Add Product"),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 3,
+                  ),
+                  onPressed: submit,
+                  child: const Text(
+                    "Add Product",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
             ],
           ),
