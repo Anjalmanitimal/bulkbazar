@@ -1,140 +1,274 @@
-import 'package:bulkbazar/features/order/domain/entities/order_entity.dart';
-import 'package:bulkbazar/features/order/presentation/viewmodel/order_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_model/cart_view_model.dart';
+import '../../../order/domain/entities/order_entity.dart';
+import '../../../order/presentation/viewmodel/order_viewmodel.dart';
 
 class BagScreen extends ConsumerWidget {
   const BagScreen({super.key});
 
   @override
-  Widget build(context, ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartViewModelProvider);
+    final isOrdering = ref.watch(orderViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("My Bag")),
+      backgroundColor: Colors.grey.shade100,
 
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: cart.items.length,
+      appBar: AppBar(
+        title: const Text(
+          "My Bag",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
 
-              itemBuilder: (_, index) {
-                final item = cart.items[index];
+      body: cart.items.isEmpty
+          ? const Center(
+              child: Text("Your bag is empty", style: TextStyle(fontSize: 16)),
+            )
+          : Column(
+              children: [
+                /// CART LIST
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: cart.items.length,
+                    itemBuilder: (context, index) {
+                      final item = cart.items[index];
 
-                return ListTile(
-                  title: Text(item.name),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 14),
+                        padding: const EdgeInsets.all(12),
 
-                  subtitle: Text("Rs ${item.price}"),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 8,
+                              color: Colors.black.withOpacity(0.05),
+                            ),
+                          ],
+                        ),
 
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                        child: Row(
+                          children: [
+                            /// IMAGE
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                "http://10.0.2.2:4000${item.image}",
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
 
+                            const SizedBox(width: 12),
+
+                            /// INFO
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 6),
+
+                                  Text(
+                                    "Rs ${item.price}",
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 10),
+
+                                  /// QUANTITY SELECTOR
+                                  Row(
+                                    children: [
+                                      _qtyButton(
+                                        icon: Icons.remove,
+                                        onTap: () {
+                                          ref
+                                              .read(
+                                                cartViewModelProvider.notifier,
+                                              )
+                                              .decrease(item.productId);
+                                        },
+                                      ),
+
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                        child: Text(
+                                          item.quantity.toString(),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+
+                                      _qtyButton(
+                                        icon: Icons.add,
+                                        onTap: () {
+                                          ref
+                                              .read(
+                                                cartViewModelProvider.notifier,
+                                              )
+                                              .increase(item.productId);
+                                        },
+                                      ),
+
+                                      const Spacer(),
+
+                                      /// DELETE BUTTON
+                                      GestureDetector(
+                                        onTap: () {
+                                          ref
+                                              .read(
+                                                cartViewModelProvider.notifier,
+                                              )
+                                              .remove(item.productId);
+                                        },
+                                        child: const Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                /// TOTAL + CHECKOUT
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+
+                  child: Column(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-
-                        onPressed: () {
-                          ref
-                              .read(cartViewModelProvider.notifier)
-                              .decrease(item.productId);
-                        },
+                      /// TOTAL ROW
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Total", style: TextStyle(fontSize: 18)),
+                          Text(
+                            "Rs ${cart.totalAmount.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ],
                       ),
 
-                      Text(item.quantity.toString()),
+                      const SizedBox(height: 16),
 
-                      IconButton(
-                        icon: const Icon(Icons.add),
+                      /// CHECKOUT BUTTON
+                      SizedBox(
+                        width: double.infinity,
+                        height: 55,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
 
-                        onPressed: () {
-                          ref
-                              .read(cartViewModelProvider.notifier)
-                              .increase(item.productId);
-                        },
+                          onPressed: isOrdering
+                              ? null
+                              : () async {
+                                  final order = OrderEntity(
+                                    items: cart.items
+                                        .map(
+                                          (e) => OrderItemEntity(
+                                            productId: e.productId,
+                                            quantity: e.quantity,
+                                            price: e.price,
+                                          ),
+                                        )
+                                        .toList(),
+                                    totalAmount: cart.totalAmount,
+                                  );
+
+                                  await ref
+                                      .read(orderViewModelProvider.notifier)
+                                      .createOrder(order);
+
+                                  ref
+                                      .read(cartViewModelProvider.notifier)
+                                      .clearCart();
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Order placed successfully",
+                                      ),
+                                    ),
+                                  );
+                                },
+
+                          child: isOrdering
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Text(
+                                  "CHECKOUT",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
                       ),
                     ],
                   ),
-                );
-              },
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(16),
-
-            child: Column(
-              children: [
-                Text(
-                  "Total: Rs ${cart.totalAmount}",
-                  style: const TextStyle(fontSize: 18),
-                ),
-
-                const SizedBox(height: 10),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    print("CHECKOUT CLICKED");
-
-                    if (cart.items.isEmpty) {
-                      print("Cart empty");
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Cart is empty")),
-                      );
-
-                      return;
-                    }
-
-                    try {
-                      print("Creating order items...");
-
-                      final orderItems = cart.items.map((item) {
-                        return OrderItemEntity(
-                          productId: item.productId,
-                          quantity: item.quantity,
-                          price: item.price,
-                        );
-                      }).toList();
-
-                      print("Items created: ${orderItems.length}");
-
-                      final order = OrderEntity(
-                        items: orderItems,
-                        totalAmount: cart.totalAmount,
-                      );
-
-                      print("Calling order API...");
-
-                      await ref
-                          .read(orderViewModelProvider.notifier)
-                          .createOrder(order);
-
-                      print("ORDER SUCCESS");
-
-                      /// clear cart after order
-                      ref.read(cartViewModelProvider.notifier).clearCart();
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Order placed successfully"),
-                        ),
-                      );
-                    } catch (e) {
-                      print("ORDER ERROR: $e");
-
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text("Error: $e")));
-                    }
-                  },
-                  child: const Text("CHECKOUT"),
                 ),
               ],
             ),
-          ),
-        ],
+    );
+  }
+
+  Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.blue),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, size: 18, color: Colors.blue),
       ),
     );
   }

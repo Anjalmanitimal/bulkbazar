@@ -80,4 +80,12 @@ class CartViewModel extends StateNotifier<CartState> {
   void clearCart() {
     state = CartState.initial();
   }
+
+  void remove(String productId) {
+    final updatedItems = state.items
+        .where((item) => item.productId != productId)
+        .toList();
+
+    state = state.copyWith(items: updatedItems);
+  }
 }
