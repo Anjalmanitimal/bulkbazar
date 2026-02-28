@@ -3,9 +3,9 @@ import '../entities/product_entity.dart';
 import '../repositories/product_repository.dart';
 import '../../data/repositories/product_repository_impl.dart';
 
-final getProductsUsecaseProvider = Provider<GetProductsUsecase>((ref) {
-  final repository = ref.read(productRepositoryProvider);
-  return GetProductsUsecase(repository);
+final getProductsUsecaseProvider = Provider((ref) {
+  final repo = ref.read(productRepositoryProvider);
+  return GetProductsUsecase(repo);
 });
 
 class GetProductsUsecase {
@@ -13,7 +13,7 @@ class GetProductsUsecase {
 
   GetProductsUsecase(this.repository);
 
-  Future<List<ProductEntity>> call() async {
-    return await repository.getProducts();
+  Future<List<ProductEntity>> call() {
+    return repository.getProducts();
   }
 }

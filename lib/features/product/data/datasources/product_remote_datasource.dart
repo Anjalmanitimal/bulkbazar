@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/api/api_client.dart';
 import '../models/product_model.dart';
 import '../../domain/entities/product_entity.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final productRemoteDatasourceProvider = Provider<ProductRemoteDatasource>((
   ref,
@@ -18,6 +19,9 @@ class ProductRemoteDatasource {
 
   ProductRemoteDatasource(this.apiClient);
 
+  /// =============================
+  /// ADD PRODUCT (SELLER)
+  /// =============================
   Future<void> addProduct({
     required String name,
     required String description,
@@ -26,7 +30,7 @@ class ProductRemoteDatasource {
     required List<PricingEntity> pricing,
   }) async {
     if (!await image.exists()) {
-      throw Exception("Image file not found at path: ${image.path}");
+      throw Exception("Image file not found");
     }
 
     final pricingJson = jsonEncode(
@@ -47,22 +51,41 @@ class ProductRemoteDatasource {
     });
 
     await apiClient.post(
-      "/products", // ✅ FIXED
+      "/products",
       data: formData,
       options: Options(contentType: "multipart/form-data"),
     );
   }
 
-  Future<List<ProductModel>> getProducts() async {
+  /// =============================
+  /// GET ALL PRODUCTS (CUSTOMER)
+  /// =============================
+  Future<List<ProductModel>> getAllProducts() async {
     final response = await apiClient.get(
-      "/products/seller", // ✅ FIXED
+      "/products", // ✅ PUBLIC endpoint
     );
 
-    return (response.data['data'] as List)
-        .map((e) => ProductModel.fromJson(e))
-        .toList();
+    final List data = response.data['data'];
+
+    return data.map((json) => ProductModel.fromJson(json)).toList();
   }
 
+  /// =============================
+  /// GET SELLER PRODUCTS (SELLER)
+  /// =============================
+  Future<List<ProductModel>> getSellerProducts() async {
+    final response = await apiClient.get(
+      "/products/seller", // ✅ SELLER endpoint
+    );
+
+    final List data = response.data['data'];
+
+    return data.map((json) => ProductModel.fromJson(json)).toList();
+  }
+
+  /// =============================
+  /// UPDATE PRODUCT
+  /// =============================
   Future<void> updateProduct({
     required String productId,
     required String name,
@@ -84,17 +107,26 @@ class ProductRemoteDatasource {
 
     if (image != null) {
       formData.files.add(
-        MapEntry("image", await MultipartFile.fromFile(image.path)),
+        MapEntry(
+          "image",
+          await MultipartFile.fromFile(
+            image.path,
+            filename: image.path.split('/').last,
+          ),
+        ),
       );
     }
 
     await apiClient.put(
-      "/products/$productId", // ✅ FIXED
+      "/products/$productId",
       data: formData,
       options: Options(contentType: "multipart/form-data"),
     );
   }
 
+  /// =============================
+  /// DELETE PRODUCT
+  /// =============================
   Future<void> deleteProduct(String productId) async {
     await apiClient.delete("/products/$productId");
   }

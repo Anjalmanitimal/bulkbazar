@@ -14,36 +14,51 @@ class SellerDashboardScreen extends ConsumerWidget {
     final productsAsync = ref.watch(productProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("My Products")),
+      backgroundColor: const Color(0xffF4F8FF),
+
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.blue,
+        title: const Text(
+          "My Products",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
 
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        elevation: 4,
+        child: const Icon(Icons.add, color: Colors.white),
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddProductScreen()),
           );
         },
-        child: const Icon(Icons.add),
       ),
 
       body: productsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () =>
+            const Center(child: CircularProgressIndicator(color: Colors.blue)),
 
         error: (e, _) => Center(child: Text(e.toString())),
 
         data: (products) {
           if (products.isEmpty) {
-            return const Center(child: Text("No products yet"));
+            return const Center(
+              child: Text("No products yet", style: TextStyle(fontSize: 16)),
+            );
           }
 
           return RefreshIndicator(
+            color: Colors.blue,
             onRefresh: () async {
-              ref.refresh(productProvider);
+              await ref.read(productProvider.notifier).fetchProducts();
             },
 
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-
               itemCount: products.length,
 
               itemBuilder: (_, index) {
@@ -62,37 +77,16 @@ class SellerDashboardScreen extends ConsumerWidget {
                   },
 
                   onDelete: () async {
-                    final confirm = await showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text("Delete Product"),
-                        content: const Text(
-                          "Are you sure you want to delete this product?",
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text("Cancel"),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text("Delete"),
-                          ),
-                        ],
+                    await ref
+                        .read(productProvider.notifier)
+                        .deleteProduct(product.id);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Product deleted"),
+                        backgroundColor: Colors.blue,
                       ),
                     );
-
-                    if (confirm == true) {
-                      await ref
-                          .read(productProvider.notifier)
-                          .deleteProduct(product.id);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Product deleted successfully"),
-                        ),
-                      );
-                    }
                   },
                 );
               },

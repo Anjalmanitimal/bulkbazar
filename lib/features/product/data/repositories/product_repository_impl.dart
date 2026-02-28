@@ -16,25 +16,47 @@ class ProductRepositoryImpl implements ProductRepository {
 
   ProductRepositoryImpl(this.remoteDatasource);
 
+  /// ==========================================
+  /// CUSTOMER → GET ALL PRODUCTS
+  /// ==========================================
   @override
   Future<List<ProductEntity>> getProducts() async {
-    final models = await remoteDatasource.getProducts();
+    final models = await remoteDatasource.getAllProducts();
 
-    return models
-        .map(
-          (model) => ProductEntity(
-            id: model.id,
-            name: model.name,
-            description: model.description,
-            image: model.image,
-            category: model.category,
-            pricing: model.pricing,
-            // ✅ FIXED
-          ),
-        )
-        .toList();
+    return models.map((model) {
+      return ProductEntity(
+        id: model.id,
+        name: model.name,
+        description: model.description,
+        image: model.image,
+        category: model.category,
+        pricing: model.pricing,
+      );
+    }).toList();
   }
 
+  /// ==========================================
+  /// SELLER → GET SELLER PRODUCTS
+  /// ==========================================
+  @override
+  Future<List<ProductEntity>> getSellerProducts() async {
+    final models = await remoteDatasource.getSellerProducts();
+
+    return models.map((model) {
+      return ProductEntity(
+        id: model.id,
+        name: model.name,
+        description: model.description,
+        image: model.image,
+        category: model.category,
+        pricing: model.pricing,
+      );
+    }).toList();
+  }
+
+  /// ==========================================
+  /// ADD PRODUCT
+  /// ==========================================
   @override
   Future<void> addProduct({
     required String name,
@@ -48,10 +70,13 @@ class ProductRepositoryImpl implements ProductRepository {
       description: description,
       image: image,
       pricing: pricing,
-      category: category, // ✅ FIXED
+      category: category,
     );
   }
 
+  /// ==========================================
+  /// UPDATE PRODUCT
+  /// ==========================================
   @override
   Future<void> updateProduct({
     required String productId,
@@ -67,10 +92,13 @@ class ProductRepositoryImpl implements ProductRepository {
       description: description,
       image: image,
       pricing: pricing,
-      category: category, // ✅ FIXED
+      category: category,
     );
   }
 
+  /// ==========================================
+  /// DELETE PRODUCT
+  /// ==========================================
   @override
   Future<void> deleteProduct(String productId) async {
     await remoteDatasource.deleteProduct(productId);
