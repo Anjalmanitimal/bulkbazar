@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../domain/entities/product_entity.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../datasources/product_remote_datasource.dart';
-import '../models/product_model.dart';
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   final remoteDatasource = ref.read(productRemoteDatasourceProvider);
@@ -25,7 +27,9 @@ class ProductRepositoryImpl implements ProductRepository {
             name: model.name,
             description: model.description,
             image: model.image,
+            category: model.category,
             pricing: model.pricing,
+            // ✅ FIXED
           ),
         )
         .toList();
@@ -35,14 +39,35 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> addProduct({
     required String name,
     required String description,
-    required dynamic image,
-    required List<PricingEntity> pricing, // ✅ FIXED TYPE
+    required File image,
+    required List<PricingEntity> pricing,
+    required String category,
   }) async {
     await remoteDatasource.addProduct(
       name: name,
       description: description,
       image: image,
       pricing: pricing,
+      category: category, // ✅ FIXED
+    );
+  }
+
+  @override
+  Future<void> updateProduct({
+    required String productId,
+    required String name,
+    required String description,
+    required File? image,
+    required List<PricingEntity> pricing,
+    required String category,
+  }) async {
+    await remoteDatasource.updateProduct(
+      productId: productId,
+      name: name,
+      description: description,
+      image: image,
+      pricing: pricing,
+      category: category, // ✅ FIXED
     );
   }
 }

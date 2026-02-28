@@ -1,10 +1,11 @@
 import 'dart:io';
+
 import 'package:bulkbazar/features/product/domain/usecases/add_product_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../domain/entities/product_entity.dart';
-import '../providers/product_provider.dart';
 
 class AddProductScreen extends ConsumerStatefulWidget {
   const AddProductScreen({super.key});
@@ -18,16 +19,18 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
+  final categoryController = TextEditingController();
+
+  final moqController = TextEditingController();
+  final priceController = TextEditingController();
 
   File? selectedImage;
 
   List<PricingEntity> pricingList = [];
 
-  final moqController = TextEditingController();
-  final priceController = TextEditingController();
-
   Future<void> pickImage() async {
     final picker = ImagePicker();
+
     final image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
@@ -50,52 +53,71 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     }
   }
 
+  void removePricing(int index) {
+    setState(() {
+      pricingList.removeAt(index);
+    });
+  }
+
   Future<void> submit() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     if (selectedImage == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Please select an image")));
+      ).showSnackBar(const SnackBar(content: Text("Please select image")));
       return;
     }
 
     if (pricingList.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Please add MOQ pricing")));
+      ).showSnackBar(const SnackBar(content: Text("Add pricing")));
       return;
     }
 
     try {
-      print("Selected image path: ${selectedImage!.path}");
-      print("File exists: ${await selectedImage!.exists()}");
-
       await ref
           .read(addProductUsecaseProvider)
           .call(
             name: nameController.text,
             description: descriptionController.text,
+            category: categoryController.text,
             image: selectedImage!,
             pricing: pricingList,
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Product added successfully")),
-        );
-
         Navigator.pop(context);
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Product Added")));
       }
     } catch (e) {
-      print("UPLOAD ERROR: $e");
-
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
+  }
+
+  Widget buildPricingList() {
+    return Column(
+      children: List.generate(pricingList.length, (index) {
+        final price = pricingList[index];
+
+        return Card(
+          child: ListTile(
+            title: Text("MOQ: ${price.moq}"),
+            subtitle: Text("Price: ₹${price.price}"),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => removePricing(index),
+            ),
+          ),
+        );
+      }),
+    );
   }
 
   @override
@@ -115,9 +137,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     : Container(
                         height: 150,
                         color: Colors.grey[300],
-                        child: const Center(child: Text("Tap to select image")),
+                        child: const Center(child: Text("Select Image")),
                       ),
               ),
+
               const SizedBox(height: 16),
 
               TextFormField(
@@ -125,6 +148,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 decoration: const InputDecoration(labelText: "Product Name"),
                 validator: (v) => v!.isEmpty ? "Required" : null,
               ),
+
               const SizedBox(height: 12),
 
               TextFormField(
@@ -132,68 +156,60 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 decoration: const InputDecoration(labelText: "Description"),
                 validator: (v) => v!.isEmpty ? "Required" : null,
               ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: categoryController,
+                decoration: const InputDecoration(labelText: "Category"),
+                validator: (v) => v!.isEmpty ? "Required" : null,
+              ),
+
+              const SizedBox(height: 20),
 
               const Text(
-                "Add MOQ Pricing",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                "Add Pricing",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
 
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: moqController,
-                      keyboardType: TextInputType.number,
                       decoration: const InputDecoration(labelText: "MOQ"),
+                      keyboardType: TextInputType.number,
                     ),
                   ),
-                  const SizedBox(width: 8),
+
+                  const SizedBox(width: 10),
+
                   Expanded(
                     child: TextField(
                       controller: priceController,
-                      keyboardType: TextInputType.number,
                       decoration: const InputDecoration(labelText: "Price"),
+                      keyboardType: TextInputType.number,
                     ),
                   ),
+
                   IconButton(
-                    onPressed: addPricing,
                     icon: const Icon(Icons.add),
+                    onPressed: addPricing,
                   ),
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
-              Column(
-                children: pricingList.map((p) {
-                  return ListTile(
-                    title: Text("Min ${p.moq} pcs"),
-                    trailing: Text("₹ ${p.price}"),
-                  );
-                }).toList(),
-              ),
+              buildPricingList(),
 
               const SizedBox(height: 20),
 
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 3,
-                  ),
                   onPressed: submit,
-                  child: const Text(
-                    "Add Product",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  child: const Text("Add Product"),
                 ),
               ),
             ],

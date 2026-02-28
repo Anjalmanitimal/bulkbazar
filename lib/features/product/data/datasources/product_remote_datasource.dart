@@ -21,20 +21,18 @@ class ProductRemoteDatasource {
   Future<void> addProduct({
     required String name,
     required String description,
+    required String category,
     required File image,
     required List<PricingEntity> pricing,
   }) async {
-    // ✅ CHECK FILE EXISTS
     if (!await image.exists()) {
       throw Exception("Image file not found at path: ${image.path}");
     }
 
-    // ✅ CONVERT PRICING TO JSON STRING (IMPORTANT FOR BACKEND)
     final pricingJson = jsonEncode(
       pricing.map((e) => {"moq": e.moq, "price": e.price}).toList(),
     );
 
-    // ✅ CREATE MULTIPART FILE SAFELY
     final multipartImage = await MultipartFile.fromFile(
       image.path,
       filename: image.path.split('/').last,
@@ -43,26 +41,57 @@ class ProductRemoteDatasource {
     final formData = FormData.fromMap({
       "name": name,
       "description": description,
+      "category": category,
       "pricing": pricingJson,
       "image": multipartImage,
     });
 
-    // ✅ DEBUG PRINT
-    print("Uploading image path: ${image.path}");
-    print("File exists: ${await image.exists()}");
-
     await apiClient.post(
-      "/products",
+      "/products", // ✅ FIXED
       data: formData,
       options: Options(contentType: "multipart/form-data"),
     );
   }
 
   Future<List<ProductModel>> getProducts() async {
-    final response = await apiClient.get("/products");
+    final response = await apiClient.get(
+      "/products/seller", // ✅ FIXED
+    );
 
     return (response.data['data'] as List)
         .map((e) => ProductModel.fromJson(e))
         .toList();
+  }
+
+  Future<void> updateProduct({
+    required String productId,
+    required String name,
+    required String description,
+    required String category,
+    File? image,
+    required List<PricingEntity> pricing,
+  }) async {
+    final pricingJson = jsonEncode(
+      pricing.map((e) => {"moq": e.moq, "price": e.price}).toList(),
+    );
+
+    FormData formData = FormData.fromMap({
+      "name": name,
+      "description": description,
+      "category": category,
+      "pricing": pricingJson,
+    });
+
+    if (image != null) {
+      formData.files.add(
+        MapEntry("image", await MultipartFile.fromFile(image.path)),
+      );
+    }
+
+    await apiClient.put(
+      "/products/$productId", // ✅ FIXED
+      data: formData,
+      options: Options(contentType: "multipart/form-data"),
+    );
   }
 }

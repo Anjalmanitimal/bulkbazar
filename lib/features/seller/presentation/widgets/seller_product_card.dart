@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../product/domain/entities/product_entity.dart';
+import '../../../../core/api/api_endpoints.dart';
 
 class SellerProductCard extends StatelessWidget {
   final ProductEntity product;
@@ -15,7 +16,7 @@ class SellerProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = "http://10.0.2.2:5000/${product.image}";
+    final imageUrl = "${ApiEndpoints.imageBaseUrl}${product.image}";
 
     return Card(
       elevation: 4,
@@ -32,6 +33,15 @@ class SellerProductCard extends StatelessWidget {
               height: 170,
               width: double.infinity,
               fit: BoxFit.cover,
+
+              /// fallback if fails
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 170,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.image, size: 50),
+                );
+              },
             ),
           ),
 
@@ -40,7 +50,7 @@ class SellerProductCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// Name + actions
+                /// Name + menu
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -55,12 +65,9 @@ class SellerProductCard extends StatelessWidget {
                     ),
 
                     PopupMenuButton(
-                      itemBuilder: (_) => [
-                        PopupMenuItem(value: "edit", child: const Text("Edit")),
-                        PopupMenuItem(
-                          value: "delete",
-                          child: const Text("Delete"),
-                        ),
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(value: "edit", child: Text("Edit")),
+                        PopupMenuItem(value: "delete", child: Text("Delete")),
                       ],
                       onSelected: (value) {
                         if (value == "edit") onEdit();

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../product/presentation/providers/product_provider.dart';
 import '../../../product/presentation/screens/add_product_screen.dart';
 import '../widgets/seller_product_card.dart';
+import 'edit_product_screen.dart';
 
 class SellerDashboardScreen extends ConsumerWidget {
   const SellerDashboardScreen({super.key});
@@ -52,7 +53,12 @@ class SellerDashboardScreen extends ConsumerWidget {
                   product: product,
 
                   onEdit: () {
-                    /// Next step: open edit screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditProductScreen(product: product),
+                      ),
+                    );
                   },
 
                   onDelete: () {

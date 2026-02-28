@@ -18,12 +18,14 @@ class AddProductUsecase {
     required String description,
     required dynamic image,
     required List<PricingEntity> pricing,
+    required String category,
   }) async {
     await repository.addProduct(
       name: name,
       description: description,
       image: image,
       pricing: pricing,
+      category: category,
     );
   }
 }

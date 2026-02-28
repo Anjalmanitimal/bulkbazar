@@ -5,9 +5,15 @@ class ApiEndpoints {
   static const Duration connectionTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 15);
 
+  // Auth
   static const String register = '/auth/register';
   static const String login = '/auth/login';
 
+  // Profile
   static const String profile = "/profile";
   static const String profileUpload = "/profile/upload";
+
+  // Products ✅
+  static const String products = "/products";
+  static const String sellerProducts = "/products/seller";
 }
