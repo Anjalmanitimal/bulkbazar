@@ -21,4 +21,6 @@ abstract class ProductRepository {
     required File? image,
     required List<PricingEntity> pricing,
   });
+
+  Future<void> deleteProduct(String productId);
 }

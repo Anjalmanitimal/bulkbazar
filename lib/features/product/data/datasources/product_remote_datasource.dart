@@ -94,4 +94,8 @@ class ProductRemoteDatasource {
       options: Options(contentType: "multipart/form-data"),
     );
   }
+
+  Future<void> deleteProduct(String productId) async {
+    await apiClient.delete("/products/$productId");
+  }
 }

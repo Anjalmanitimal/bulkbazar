@@ -70,4 +70,9 @@ class ProductRepositoryImpl implements ProductRepository {
       category: category, // ✅ FIXED
     );
   }
+
+  @override
+  Future<void> deleteProduct(String productId) async {
+    await remoteDatasource.deleteProduct(productId);
+  }
 }
