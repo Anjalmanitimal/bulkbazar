@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../product/domain/entities/product_entity.dart';
+import '../screens/product_detail_screen.dart';
 
 class RelatedProductsSection extends StatelessWidget {
   final List<ProductEntity> products;
@@ -25,7 +26,8 @@ class RelatedProductsSection extends StatelessWidget {
           const SizedBox(height: 12),
 
           SizedBox(
-            height: 160,
+            height: 180,
+
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: products.length,
@@ -35,16 +37,56 @@ class RelatedProductsSection extends StatelessWidget {
 
                 final imageUrl = "http://10.0.2.2:4000${product.image}";
 
-                return Container(
-                  width: 130,
-                  margin: const EdgeInsets.only(right: 12),
+                final price = product.pricing.isNotEmpty
+                    ? product.pricing.first.price
+                    : 0;
 
-                  child: Column(
-                    children: [
-                      Image.network(imageUrl, height: 90),
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailScreen(product: product),
+                      ),
+                    );
+                  },
 
-                      Text(product.name, maxLines: 1),
-                    ],
+                  child: Container(
+                    width: 140,
+                    margin: const EdgeInsets.only(right: 12),
+
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+
+                          child: Image.network(
+                            imageUrl,
+                            height: 100,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        Text(
+                          product.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        Text(
+                          "Rs. $price",
+                          style: const TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

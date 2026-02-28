@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../product/domain/entities/product_entity.dart';
-import '../view_model/product_detail_view_model.dart';
+
+import '../view_model/product_detail_view_model.dart'; // ✅ ADD THIS
+
 import '../widgets/product_detail_header.dart';
 import '../widgets/add_to_cart_button.dart';
 import '../widgets/related_products_section.dart';
@@ -75,7 +77,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailScreen> {
 
             const SizedBox(height: 20),
 
-            AddToCartButton(),
+            AddToCartButton(product: product),
 
             const SizedBox(height: 30),
 
