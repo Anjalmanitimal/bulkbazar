@@ -20,4 +20,9 @@ class OrderRepositoryImpl {
       totalAmount: order.totalAmount,
     );
   }
+
+  /// NEW
+  Future<List<OrderEntity>> getMyOrders() {
+    return remoteDatasource.getMyOrders();
+  }
 }

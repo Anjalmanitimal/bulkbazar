@@ -11,7 +11,9 @@ class BagScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartViewModelProvider);
-    final isOrdering = ref.watch(orderViewModelProvider);
+
+    /// FIX: use OrderState instead of bool
+    final orderState = ref.watch(orderViewModelProvider);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -76,6 +78,7 @@ class BagScreen extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  /// NAME
                                   Text(
                                     item.name,
                                     style: const TextStyle(
@@ -86,6 +89,7 @@ class BagScreen extends ConsumerWidget {
 
                                   const SizedBox(height: 6),
 
+                                  /// PRICE
                                   Text(
                                     "Rs ${item.price}",
                                     style: const TextStyle(
@@ -96,9 +100,10 @@ class BagScreen extends ConsumerWidget {
 
                                   const SizedBox(height: 10),
 
-                                  /// QUANTITY SELECTOR
+                                  /// QUANTITY + DELETE
                                   Row(
                                     children: [
+                                      /// DECREASE
                                       _qtyButton(
                                         icon: Icons.remove,
                                         onTap: () {
@@ -123,6 +128,7 @@ class BagScreen extends ConsumerWidget {
                                         ),
                                       ),
 
+                                      /// INCREASE
                                       _qtyButton(
                                         icon: Icons.add,
                                         onTap: () {
@@ -136,7 +142,7 @@ class BagScreen extends ConsumerWidget {
 
                                       const Spacer(),
 
-                                      /// DELETE BUTTON
+                                      /// DELETE
                                       GestureDetector(
                                         onTap: () {
                                           ref
@@ -165,6 +171,7 @@ class BagScreen extends ConsumerWidget {
                 /// TOTAL + CHECKOUT
                 Container(
                   padding: const EdgeInsets.all(16),
+
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.vertical(
@@ -174,11 +181,12 @@ class BagScreen extends ConsumerWidget {
 
                   child: Column(
                     children: [
-                      /// TOTAL ROW
+                      /// TOTAL
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text("Total", style: TextStyle(fontSize: 18)),
+
                           Text(
                             "Rs ${cart.totalAmount.toStringAsFixed(2)}",
                             style: const TextStyle(
@@ -196,6 +204,7 @@ class BagScreen extends ConsumerWidget {
                       SizedBox(
                         width: double.infinity,
                         height: 55,
+
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
@@ -204,19 +213,20 @@ class BagScreen extends ConsumerWidget {
                             ),
                           ),
 
-                          onPressed: isOrdering
+                          /// FIX HERE
+                          onPressed: orderState.loading
                               ? null
                               : () async {
                                   final order = OrderEntity(
-                                    items: cart.items
-                                        .map(
-                                          (e) => OrderItemEntity(
-                                            productId: e.productId,
-                                            quantity: e.quantity,
-                                            price: e.price,
-                                          ),
-                                        )
-                                        .toList(),
+                                    id: "", // backend generates
+                                    createdAt: DateTime.now(),
+                                    items: cart.items.map((e) {
+                                      return OrderItemEntity(
+                                        productId: e.productId,
+                                        quantity: e.quantity,
+                                        price: e.price,
+                                      );
+                                    }).toList(),
                                     totalAmount: cart.totalAmount,
                                   );
 
@@ -237,7 +247,8 @@ class BagScreen extends ConsumerWidget {
                                   );
                                 },
 
-                          child: isOrdering
+                          /// FIX HERE
+                          child: orderState.loading
                               ? const CircularProgressIndicator(
                                   color: Colors.white,
                                 )
@@ -261,13 +272,17 @@ class BagScreen extends ConsumerWidget {
   Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
+
       borderRadius: BorderRadius.circular(8),
+
       child: Container(
         padding: const EdgeInsets.all(6),
+
         decoration: BoxDecoration(
           border: Border.all(color: Colors.blue),
           borderRadius: BorderRadius.circular(8),
         ),
+
         child: Icon(icon, size: 18, color: Colors.blue),
       ),
     );

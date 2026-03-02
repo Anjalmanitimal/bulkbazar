@@ -1,8 +1,15 @@
 class OrderEntity {
+  final String id;
   final List<OrderItemEntity> items;
   final double totalAmount;
+  final DateTime createdAt;
 
-  OrderEntity({required this.items, required this.totalAmount});
+  OrderEntity({
+    required this.id,
+    required this.items,
+    required this.totalAmount,
+    required this.createdAt,
+  });
 }
 
 class OrderItemEntity {
