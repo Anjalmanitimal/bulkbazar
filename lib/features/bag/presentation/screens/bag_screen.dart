@@ -223,6 +223,7 @@ class BagScreen extends ConsumerWidget {
                                     items: cart.items.map((e) {
                                       return OrderItemEntity(
                                         productId: e.productId,
+                                        productName: e.name,
                                         quantity: e.quantity,
                                         price: e.price,
                                       );

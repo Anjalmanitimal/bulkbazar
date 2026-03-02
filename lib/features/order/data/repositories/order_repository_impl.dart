@@ -21,8 +21,11 @@ class OrderRepositoryImpl {
     );
   }
 
-  /// NEW
-  Future<List<OrderEntity>> getMyOrders() {
-    return remoteDatasource.getMyOrders();
+  Future<List<OrderEntity>> getMyOrders() async {
+    return await remoteDatasource.getMyOrders();
+  }
+
+  Future<void> deleteOrder(String orderId) async {
+    await remoteDatasource.deleteOrder(orderId);
   }
 }

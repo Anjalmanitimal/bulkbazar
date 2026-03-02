@@ -40,7 +40,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final remote = ref.read(profileRemoteDatasourceProvider);
       await remote.uploadProfileImage(File(picked.path));
 
-      // Refresh profile after upload
       ref.invalidate(profileProvider);
     } catch (e) {
       ScaffoldMessenger.of(
@@ -54,130 +53,258 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(profileProvider);
+    final orderState = ref.watch(orderViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Profile')),
+      appBar: AppBar(title: const Text("My Profile"), centerTitle: true),
+
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+
+        error: (e, _) => Center(child: Text("Error: $e")),
+
         data: (profile) {
           final imageUrl = profile.profileImage != null
               ? '${ApiEndpoints.baseUrl.replaceAll('/api', '')}${profile.profileImage}'
               : null;
 
-          final orderState = ref.watch(orderViewModelProvider);
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(profileProvider);
+              await ref.read(orderViewModelProvider.notifier).loadOrders();
+            },
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// PROFILE IMAGE
-                Center(
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.grey.shade200,
-                        backgroundImage: imageUrl != null
-                            ? NetworkImage(imageUrl)
-                            : null,
-                        child: imageUrl == null
-                            ? const Icon(Icons.person, size: 60)
-                            : null,
-                      ),
-                      Positioned(
-                        child: InkWell(
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(20),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// PROFILE IMAGE
+                  Center(
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.grey.shade200,
+                          backgroundImage: imageUrl != null
+                              ? NetworkImage(imageUrl)
+                              : null,
+                          child: imageUrl == null
+                              ? const Icon(Icons.person, size: 60)
+                              : null,
+                        ),
+
+                        InkWell(
                           onTap: _uploading ? null : _pickAndUploadImage,
                           child: CircleAvatar(
                             radius: 18,
+                            backgroundColor: Colors.blue,
                             child: _uploading
                                 ? const SizedBox(
                                     width: 16,
                                     height: 16,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
+                                      color: Colors.white,
                                     ),
                                   )
-                                : const Icon(Icons.camera_alt, size: 18),
+                                : const Icon(
+                                    Icons.camera_alt,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// NAME
+                  Center(
+                    child: Text(
+                      profile.fullName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                /// NAME
-                Center(
-                  child: Text(
-                    profile.fullName,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 6),
+                  const SizedBox(height: 6),
 
-                /// EMAIL
-                Center(
-                  child: Text(
-                    profile.email,
-                    style: const TextStyle(color: Colors.grey),
+                  /// EMAIL
+                  Center(
+                    child: Text(
+                      profile.email,
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 30),
+                  const SizedBox(height: 30),
 
-                /// ORDERS TITLE
-                const Text(
-                  "My Orders",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                  /// ORDERS TITLE
+                  const Text(
+                    "My Orders",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
 
-                const SizedBox(height: 10),
+                  const SizedBox(height: 12),
 
-                /// ORDERS LIST
-                if (orderState.loading)
-                  const Center(child: CircularProgressIndicator())
-                else if (orderState.orders.isEmpty)
-                  const Text("No orders yet")
-                else
-                  Column(
-                    children: orderState.orders.map((order) {
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          leading: const Icon(Icons.shopping_bag),
-                          title: Text(
-                            "Rs ${order.totalAmount.toStringAsFixed(2)}",
+                  /// ORDERS LOADING
+                  if (orderState.loading)
+                    const Center(child: CircularProgressIndicator())
+                  /// NO ORDERS
+                  else if (orderState.orders.isEmpty)
+                    const Text("No orders yet")
+                  /// ORDERS LIST
+                  else
+                    Column(
+                      children: orderState.orders.map((order) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 14),
+                          padding: const EdgeInsets.all(14),
+
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 6,
+                                color: Colors.black.withOpacity(0.05),
+                              ),
+                            ],
                           ),
-                          subtitle: Text(order.createdAt.toString()),
-                        ),
-                      );
-                    }).toList(),
-                  ),
 
-                const SizedBox(height: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              /// HEADER ROW
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Rs ${order.totalAmount.toStringAsFixed(2)}",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
 
-                /// LOGOUT BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.logout),
-                    label: const Text("Logout"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
+                                      const SizedBox(height: 4),
+
+                                      Text(
+                                        order.createdAt.toString().substring(
+                                          0,
+                                          16,
+                                        ),
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.red,
+                                    ),
+
+                                    onPressed: () async {
+                                      await ref
+                                          .read(orderViewModelProvider.notifier)
+                                          .deleteOrder(order.id);
+
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Order deleted successfully",
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+
+                              const Divider(),
+
+                              /// PRODUCT LIST
+                              Column(
+                                children: order.items.map((item) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
+
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            item.productName,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+
+                                        Text(
+                                          "${item.quantity} x Rs ${item.price}",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ),
-                    onPressed: _logout,
+
+                  const SizedBox(height: 20),
+
+                  /// LOGOUT BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.logout),
+
+                      label: const Text("Logout"),
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+
+                      onPressed: _logout,
+                    ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 30),
+                ],
+              ),
             ),
           );
         },
@@ -187,13 +314,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _logout() async {
     try {
-      // clear token from storage
       final remote = ref.read(profileRemoteDatasourceProvider);
+
       await remote.logout();
 
       if (!mounted) return;
 
-      // navigate to login and remove all routes
       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     } catch (e) {
       ScaffoldMessenger.of(

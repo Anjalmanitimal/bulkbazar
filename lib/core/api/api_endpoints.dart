@@ -16,4 +16,8 @@ class ApiEndpoints {
   // Products ✅
   static const String products = "/products";
   static const String sellerProducts = "/products/seller";
+
+  static const String createOrder = "$baseUrl/orders";
+  static const String getMyOrders = "$baseUrl/orders/my-orders";
+  static const String deleteOrder = "$baseUrl/orders";
 }
