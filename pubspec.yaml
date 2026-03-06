@@ -47,6 +47,8 @@ dependencies:
   equatable: ^2.0.5
   dartz: ^0.10.1
   image_picker: ^1.0.7
+  sensors_plus: ^4.0.2
+  proximity_sensor: ^1.2.0
 
 dev_dependencies:
   flutter_test:
