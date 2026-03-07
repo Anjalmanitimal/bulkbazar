@@ -5,14 +5,59 @@ import '../view_model/cart_view_model.dart';
 import '../../../order/domain/entities/order_entity.dart';
 import '../../../order/presentation/viewmodel/order_viewmodel.dart';
 
-class BagScreen extends ConsumerWidget {
+/// SENSOR IMPORTS
+import '../../../../core/utils/accelerometer_service.dart';
+import '../../../../core/utils/proximity_service.dart';
+
+class BagScreen extends ConsumerStatefulWidget {
   const BagScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cart = ref.watch(cartViewModelProvider);
+  ConsumerState<BagScreen> createState() => _BagScreenState();
+}
 
-    /// FIX: use OrderState instead of bool
+class _BagScreenState extends ConsumerState<BagScreen> {
+  final AccelerometerService _accelerometerService = AccelerometerService();
+  final ProximityService _proximityService = ProximityService();
+
+  bool hidePrices = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// SHAKE PHONE → CLEAR BAG
+    _accelerometerService.startListening(() {
+      final cart = ref.read(cartViewModelProvider);
+
+      /// DO NOTHING IF CART EMPTY
+      if (cart.items.isEmpty) return;
+
+      ref.read(cartViewModelProvider.notifier).clearCart();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Bag cleared by shaking phone")),
+      );
+    });
+
+    /// COVER PHONE → HIDE PRICES
+    _proximityService.startListening((near) {
+      setState(() {
+        hidePrices = near;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _accelerometerService.stopListening();
+    _proximityService.stopListening();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cart = ref.watch(cartViewModelProvider);
     final orderState = ref.watch(orderViewModelProvider);
 
     return Scaffold(
@@ -91,7 +136,7 @@ class BagScreen extends ConsumerWidget {
 
                                   /// PRICE
                                   Text(
-                                    "Rs ${item.price}",
+                                    hidePrices ? "Rs ***" : "Rs ${item.price}",
                                     style: const TextStyle(
                                       color: Colors.blue,
                                       fontWeight: FontWeight.bold,
@@ -100,7 +145,7 @@ class BagScreen extends ConsumerWidget {
 
                                   const SizedBox(height: 10),
 
-                                  /// QUANTITY + DELETE
+                                  /// QTY + DELETE
                                   Row(
                                     children: [
                                       /// DECREASE
@@ -188,7 +233,9 @@ class BagScreen extends ConsumerWidget {
                           const Text("Total", style: TextStyle(fontSize: 18)),
 
                           Text(
-                            "Rs ${cart.totalAmount.toStringAsFixed(2)}",
+                            hidePrices
+                                ? "Rs ***"
+                                : "Rs ${cart.totalAmount.toStringAsFixed(2)}",
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -200,7 +247,7 @@ class BagScreen extends ConsumerWidget {
 
                       const SizedBox(height: 16),
 
-                      /// CHECKOUT BUTTON
+                      /// CHECKOUT
                       SizedBox(
                         width: double.infinity,
                         height: 55,
@@ -213,13 +260,13 @@ class BagScreen extends ConsumerWidget {
                             ),
                           ),
 
-                          /// FIX HERE
                           onPressed: orderState.loading
                               ? null
                               : () async {
                                   final order = OrderEntity(
-                                    id: "", // backend generates
+                                    id: "",
                                     createdAt: DateTime.now(),
+
                                     items: cart.items.map((e) {
                                       return OrderItemEntity(
                                         productId: e.productId,
@@ -228,6 +275,7 @@ class BagScreen extends ConsumerWidget {
                                         price: e.price,
                                       );
                                     }).toList(),
+
                                     totalAmount: cart.totalAmount,
                                   );
 
@@ -248,7 +296,6 @@ class BagScreen extends ConsumerWidget {
                                   );
                                 },
 
-                          /// FIX HERE
                           child: orderState.loading
                               ? const CircularProgressIndicator(
                                   color: Colors.white,
@@ -273,7 +320,6 @@ class BagScreen extends ConsumerWidget {
   Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
-
       borderRadius: BorderRadius.circular(8),
 
       child: Container(
