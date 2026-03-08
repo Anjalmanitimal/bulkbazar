@@ -1,3 +1,4 @@
+import 'package:bulkbazar/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import '../../../product/domain/entities/product_entity.dart';
 
@@ -15,7 +16,8 @@ class SellerProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = "http://10.0.2.2:4000${product.image}";
+    //final imageUrl = "http://10.0.2.2:4000${product.image}";
+    final imageUrl = "${ApiEndpoints.imageBaseUrl}${product.image}";
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

@@ -8,6 +8,7 @@ import '../../../order/presentation/viewmodel/order_viewmodel.dart';
 /// SENSOR IMPORTS
 import '../../../../core/utils/accelerometer_service.dart';
 import '../../../../core/utils/proximity_service.dart';
+import '../../../../core/api/api_endpoints.dart';
 
 class BagScreen extends ConsumerStatefulWidget {
   const BagScreen({super.key});
@@ -109,7 +110,7 @@ class _BagScreenState extends ConsumerState<BagScreen> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
                               child: Image.network(
-                                "http://10.0.2.2:4000${item.image}",
+                                "${ApiEndpoints.imageBaseUrl}${item.image}",
                                 width: 70,
                                 height: 70,
                                 fit: BoxFit.cover,
@@ -271,6 +272,7 @@ class _BagScreenState extends ConsumerState<BagScreen> {
                                       return OrderItemEntity(
                                         productId: e.productId,
                                         productName: e.name,
+                                        image: e.image,
                                         quantity: e.quantity,
                                         price: e.price,
                                       );

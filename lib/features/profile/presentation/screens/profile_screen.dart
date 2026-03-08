@@ -244,18 +244,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               const Divider(),
 
                               /// PRODUCT LIST
+                              /// PRODUCT LIST
                               Column(
                                 children: order.items.map((item) {
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
-                                      vertical: 4,
+                                      vertical: 6,
                                     ),
-
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-
                                       children: [
+                                        /// IMAGE
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          child: Image.network(
+                                            "${ApiEndpoints.imageBaseUrl}${item.image}",
+                                            width: 55,
+                                            height: 55,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) => Container(
+                                                  width: 55,
+                                                  height: 55,
+                                                  color: Colors.grey.shade200,
+                                                  child: const Icon(
+                                                    Icons.image_not_supported,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 10),
+
+                                        /// NAME + PRICE
                                         Expanded(
                                           child: Text(
                                             item.productName,

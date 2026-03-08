@@ -50,6 +50,7 @@ class OrderRemoteDatasource {
           return OrderItemEntity(
             productId: productId,
             productName: productName,
+            image: item["image"] ?? "",
             quantity: item["quantity"] ?? 0,
             price: (item["price"] as num).toDouble(),
           );

@@ -10,6 +10,8 @@ class OrderRepositoryImpl {
     final items = order.items.map((e) {
       return {
         "productId": e.productId,
+        "name": e.productName,
+        "image": e.image,
         "quantity": e.quantity,
         "price": e.price,
       };

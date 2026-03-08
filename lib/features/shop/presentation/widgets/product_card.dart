@@ -1,3 +1,4 @@
+import 'package:bulkbazar/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import '../../../product/domain/entities/product_entity.dart';
 import '../screens/product_detail_screen.dart'; // ✅ IMPORT THIS
@@ -44,7 +45,8 @@ class ProductCard extends StatelessWidget {
                 ),
 
                 child: Image.network(
-                  "http://10.0.2.2:4000${product.image}",
+                  //"http://10.0.2.2:4000${product.image}",
+                  "${ApiEndpoints.imageBaseUrl}${product.image}",
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),

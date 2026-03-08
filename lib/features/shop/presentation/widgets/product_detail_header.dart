@@ -1,3 +1,4 @@
+import 'package:bulkbazar/core/api/api_endpoints.dart';
 import 'package:flutter/material.dart';
 import '../../../product/domain/entities/product_entity.dart';
 
@@ -8,7 +9,8 @@ class ProductDetailHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = "http://10.0.2.2:4000${product.image}";
+    //final imageUrl = "http://10.0.2.2:4000${product.image}";
+    final imageUrl = "${ApiEndpoints.imageBaseUrl}${product.image}";
 
     /// FIX PRICE
     final price = product.pricing.isNotEmpty ? product.pricing.first.price : 0;

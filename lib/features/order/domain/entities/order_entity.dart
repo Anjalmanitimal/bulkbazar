@@ -15,12 +15,14 @@ class OrderEntity {
 class OrderItemEntity {
   final String productId;
   final String productName;
+  final String image;
   final int quantity;
   final double price;
 
   OrderItemEntity({
     required this.productId,
     required this.productName,
+    required this.image,
     required this.quantity,
     required this.price,
   });
