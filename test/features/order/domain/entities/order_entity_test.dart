@@ -2,14 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bulkbazar/features/order/domain/entities/order_entity.dart';
 
 void main() {
-  // ─────────────────────────────────────────
-  // UNIT TEST 1 — OrderItemEntity holds correct values
-  // covers line 21 (OrderItemEntity constructor)
-  // ─────────────────────────────────────────
   test('OrderItemEntity should hold correct field values', () {
     final item = OrderItemEntity(
       productId: 'p1',
       productName: 'Rice Bag',
+      image: '', // ← ADD
       quantity: 3,
       price: 200.0,
     );
@@ -20,10 +17,6 @@ void main() {
     expect(item.price, 200.0);
   });
 
-  // ─────────────────────────────────────────
-  // UNIT TEST 2 — OrderEntity holds correct values
-  // covers line 7 (OrderEntity constructor)
-  // ─────────────────────────────────────────
   test('OrderEntity should hold correct field values', () {
     final now = DateTime(2025, 1, 1);
 
@@ -33,6 +26,7 @@ void main() {
         OrderItemEntity(
           productId: 'p1',
           productName: 'Sugar',
+          image: '', // ← ADD
           quantity: 2,
           price: 100.0,
         ),
@@ -47,9 +41,6 @@ void main() {
     expect(order.createdAt, now);
   });
 
-  // ─────────────────────────────────────────
-  // UNIT TEST 3 — OrderEntity supports multiple items
-  // ─────────────────────────────────────────
   test('OrderEntity should support multiple order items', () {
     final order = OrderEntity(
       id: 'order2',
@@ -57,12 +48,14 @@ void main() {
         OrderItemEntity(
           productId: 'p1',
           productName: 'Rice',
+          image: '', // ← ADD
           quantity: 1,
           price: 100.0,
         ),
         OrderItemEntity(
           productId: 'p2',
           productName: 'Oil',
+          image: '', // ← ADD
           quantity: 2,
           price: 150.0,
         ),
@@ -76,9 +69,6 @@ void main() {
     expect(order.items.last.productName, 'Oil');
   });
 
-  // ─────────────────────────────────────────
-  // UNIT TEST 4 — OrderEntity can have empty items list
-  // ─────────────────────────────────────────
   test('OrderEntity should allow empty items list', () {
     final order = OrderEntity(
       id: 'order3',

@@ -5,7 +5,6 @@ import 'package:bulkbazar/core/api/api_endpoints.dart';
 import 'package:bulkbazar/core/services/hive/storage/user_session_service.dart';
 import '../auth_datasource.dart';
 import '../../models/auth_api_model.dart';
-import '../../models/register_api_model.dart';
 import '../../../domain/entities/auth_entity.dart';
 
 final authRemoteDatasourceProvider = Provider<IAuthRemoteDatasource>((ref) {
@@ -51,7 +50,7 @@ class AuthRemoteDatasource implements IAuthRemoteDatasource {
       final user = AuthApiModel.fromJson(response.data['data']);
 
       await _userSessionService.saveUserSession(
-        userId: user.id!,
+        userId: user.id,
         email: user.email,
         fullName: user.fullName,
         role: user.role,

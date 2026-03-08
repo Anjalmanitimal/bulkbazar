@@ -4,7 +4,6 @@ import '../state/auth_state.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../../data/models/auth_api_model.dart';
-import '../../data/repositories/auth_repository.dart';
 
 final authViewModelProvider = NotifierProvider<AuthViewModel, AuthState>(
   AuthViewModel.new,
